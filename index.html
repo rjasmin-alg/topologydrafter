@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TopologyDrafter</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect x='2' y='8' width='20' height='11' rx='3' fill='none' stroke='%230ea5e9' stroke-width='2'/></svg>">
+</head>
+<body>
+
+<header class="toolbar" id="toolbar">
+  <div class="tb-group brand">
+    <svg viewBox="0 0 24 24" class="brand-mark" aria-hidden="true">
+      <circle cx="5" cy="6" r="2.6"/><circle cx="19" cy="6" r="2.6"/>
+      <circle cx="12" cy="18" r="2.6"/>
+      <path d="M5 8.6 12 15.4M19 8.6 12 15.4M7.5 6h9"/>
+    </svg>
+    <input id="doc-title" class="doc-title" value="Untitled topology" spellcheck="false"
+           aria-label="Diagram title">
+  </div>
+
+  <div class="tb-group">
+    <button data-act="new" title="New diagram">New</button>
+    <button data-act="open" title="Open a .json topology">Open</button>
+    <button data-act="save" title="Save as .json (Ctrl+S)">Save</button>
+    <details class="menu"><summary>Samples</summary>
+      <div class="menu-body" id="samples-menu"></div>
+    </details>
+    <details class="menu"><summary>Export</summary>
+      <div class="menu-body">
+        <button data-act="png2">PNG — 2× (slides)</button>
+        <button data-act="png3">PNG — 3× (print)</button>
+        <button data-act="pngT">PNG — transparent</button>
+        <button data-act="svg">SVG — vector</button>
+        <button data-act="copy">Copy image to clipboard</button>
+      </div>
+    </details>
+  </div>
+
+  <div class="tb-group">
+    <button data-act="undo" id="btn-undo" title="Undo (Ctrl+Z)" class="icon">↶</button>
+    <button data-act="redo" id="btn-redo" title="Redo (Ctrl+Y)" class="icon">↷</button>
+  </div>
+
+  <div class="tb-group tools" role="group" aria-label="Tools">
+    <button data-tool="select" class="icon on" title="Select and move (V)">⌖</button>
+    <button data-tool="link" class="icon" title="Draw links (L)">⁄</button>
+    <button data-tool="zone" class="icon" title="Draw a site / zone box (Z)">▭</button>
+    <button data-tool="note" class="icon" title="Add text (T)">T</button>
+    <select id="link-kind" title="Link type for new cables"></select>
+  </div>
+
+  <div class="tb-group">
+    <button data-act="snap" id="btn-snap" title="Snap to grid" class="toggle on">Snap</button>
+    <button data-act="grid" id="btn-grid" title="Show grid" class="toggle on">Grid</button>
+    <button data-act="routing" id="btn-routing" title="Link routing" class="toggle on">Elbow</button>
+    <button data-act="theme" id="btn-theme" title="Canvas theme" class="toggle">Light</button>
+  </div>
+
+  <div class="tb-group zoom">
+    <button data-act="zoom-out" class="icon" title="Zoom out (-)">−</button>
+    <button data-act="zoom-reset" id="zoom-level" title="Reset to 100%">100%</button>
+    <button data-act="zoom-in" class="icon" title="Zoom in (+)">+</button>
+    <button data-act="fit" title="Fit to content (0)">Fit</button>
+  </div>
+
+  <div class="tb-group right">
+    <button data-act="present" class="primary" title="Presentation mode (P)">Present</button>
+  </div>
+</header>
+
+<main class="workspace">
+  <aside class="rail left" id="palette" aria-label="Device palette"></aside>
+
+  <div class="canvas-wrap">
+    <svg id="canvas" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="canvas-hint" id="placing-hint" hidden></div>
+  </div>
+
+  <aside class="rail right" id="inspector" aria-label="Properties"></aside>
+</main>
+
+<footer class="statusbar">
+  <span id="status-left">Ready</span>
+  <span id="status-right"></span>
+</footer>
+
+<div class="present-bar" id="present-bar" hidden>
+  <button data-act="step-prev" title="Previous step (←)">←</button>
+  <span id="step-label">Step 0</span>
+  <button data-act="step-next" title="Next step (→)">→</button>
+  <span class="sep"></span>
+  <button data-act="clear-focus">Clear highlight</button>
+  <button data-act="exit-present" class="primary">Exit (Esc)</button>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

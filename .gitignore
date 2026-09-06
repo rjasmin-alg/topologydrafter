@@ -1,0 +1,4 @@
+# Nothing to build, nothing to install — just editor noise.
+.DS_Store
+*.swp
+*~

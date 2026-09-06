@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TopologyDrafter — smoke tests</title>
+<style>
+  body { font: 13px/1.5 system-ui, sans-serif; background: #10151f; color: #e6edf7;
+         margin: 0; padding: 20px 24px; }
+  h1 { font-size: 16px; margin: 0 0 4px; }
+  #summary { font-size: 15px; font-weight: 700; margin: 10px 0 16px; padding: 8px 12px;
+             border-radius: 6px; display: inline-block; }
+  .ok { background: #14532d; color: #bbf7d0; }
+  .bad { background: #7f1d1d; color: #fecaca; }
+  ol { padding-left: 22px; margin: 0; }
+  li { padding: 2px 0; }
+  li.pass::marker { color: #4ade80; }
+  li.fail { color: #fca5a5; }
+  li.fail::marker { color: #f87171; }
+  code { background: #1c2739; padding: 1px 5px; border-radius: 4px; }
+  #stage { position: absolute; left: -4000px; top: 0; width: 1200px; height: 800px; }
+</style>
+</head>
+<body>
+<h1>TopologyDrafter — smoke tests</h1>
+<div id="summary">running…</div>
+<ol id="results"></ol>
+
+<!-- Off-screen but really laid out: the renderer and exporter need a live canvas. -->
+<div id="stage"><svg id="canvas" xmlns="http://www.w3.org/2000/svg"
+     style="width:1200px;height:800px"></svg></div>
+
+<script type="module">
+import { SERVICES, DEVICES, LINK_KINDS } from '../js/catalog.js';
+import { ICONS, iconFor } from '../js/icons.js';
+import { layoutNode, routeLink, distanceToPolyline, wrapText, HALF } from '../js/geom.js';
+import {
+  state, newDoc, loadDoc, addNode, addLink, commit, undo, redo, removeIds, changed, maxStep,
+} from '../js/state.js';
+import { initRenderer, render } from '../js/render.js';
+import { initInteractions, contentBounds, fitToContent } from '../js/interact.js';
+import { buildSvg } from '../js/exporters.js';
+import { SAMPLES, makeSample } from '../js/samples.js';
+
+const results = [];
+function check(name, fn) {
+  try {
+    const detail = fn();
+    results.push({ name, pass: true, detail: detail || '' });
+  } catch (err) {
+    results.push({ name, pass: false, detail: err.message });
+  }
+}
+const assert = (cond, msg) => { if (!cond) throw new Error(msg); };
+
+const canvas = document.querySelector('#canvas');
+initRenderer(canvas);
+initInteractions(canvas);
+
+// ---------------------------------------------------------------- catalog ---
+check('every device has an icon glyph', () => {
+  const missing = Object.values(DEVICES).filter((d) => !ICONS[d.icon]);
+  assert(!missing.length, `no glyph for: ${missing.map((d) => `${d.id}/${d.icon}`).join(', ')}`);
+  return `${Object.keys(DEVICES).length} devices`;
+});
+
+check('every icon glyph is well-formed SVG', () => {
+  const parser = new DOMParser();
+  for (const key of Object.keys(ICONS)) {
+    const doc = parser.parseFromString(
+      `<svg xmlns="http://www.w3.org/2000/svg">${iconFor(key)}</svg>`, 'image/svg+xml');
+    assert(!doc.querySelector('parsererror'), `${key}: ${doc.querySelector('parsererror')?.textContent}`);
+  }
+  return `${Object.keys(ICONS).length} glyphs`;
+});
+
+check('device default services all exist', () => {
+  for (const d of Object.values(DEVICES)) {
+    for (const s of d.services) assert(SERVICES[s], `${d.id} references unknown service "${s}"`);
+  }
+  return `${Object.keys(SERVICES).length} services defined`;
+});
+
+check('service badges stay short enough to read', () => {
+  const tooLong = Object.values(SERVICES).filter((s) => s.short.length > 6);
+  assert(!tooLong.length, `too long: ${tooLong.map((s) => s.short).join(', ')}`);
+});
+
+// ------------------------------------------------------------------ layout --
+check('node layout produces a sane box', () => {
+  const node = {
+    id: 'x', type: 'dc', x: 100, y: 100, label: 'A very long domain controller name',
+    sublabel: '10.0.0.1', services: ['adds', 'dns', 'ldap', 'kerberos', 'gpo', 'smb'], step: 0,
+  };
+  const L = layoutNode(node, SERVICES);
+  assert(L.box.h > 58, 'box should be taller than the tile');
+  assert(L.labelLines.length <= 2, 'label should wrap to at most 2 lines');
+  assert(L.chipRows.length >= 2, 'six badges should wrap onto multiple rows');
+  for (const row of L.chipRows) {
+    const w = row.chips.reduce((s, c) => s + c.w, 0);
+    assert(w <= 130, `badge row overflows: ${w}`);
+  }
+  return `${L.box.w}×${Math.round(L.box.h)}, ${L.chipRows.length} badge rows`;
+});
+
+check('wrapText never returns more lines than asked', () => {
+  const lines = wrapText('one two three four five six seven eight', '13px sans-serif', 80, 2);
+  assert(lines.length <= 2, `got ${lines.length} lines`);
+});
+
+// ----------------------------------------------------------------- routing --
+check('link routing yields usable paths in both modes', () => {
+  const a = { x: 0, y: 0 };
+  const b = { x: 300, y: 160 };
+  for (const routing of ['orthogonal', 'straight']) {
+    const r = routeLink(a, b, { routing });
+    assert(/^M[-\d. ]+/.test(r.d), `${routing}: bad path "${r.d}"`);
+    assert(Number.isFinite(r.mid.x) && Number.isFinite(r.mid.y), `${routing}: bad midpoint`);
+    assert(r.points.length >= 2, `${routing}: not enough points`);
+    assert(!/NaN/.test(r.d), `${routing}: NaN in path`);
+  }
+});
+
+check('routing survives coincident nodes', () => {
+  const r = routeLink({ x: 50, y: 50 }, { x: 50, y: 50 }, { routing: 'orthogonal' });
+  assert(!/NaN/.test(r.d), `NaN in path "${r.d}"`);
+});
+
+check('link hit testing finds a point on the line', () => {
+  const r = routeLink({ x: 0, y: 0 }, { x: 200, y: 0 }, { routing: 'orthogonal' });
+  assert(distanceToPolyline(r.points, 100, 0) < 1, 'midpoint should be on the line');
+  assert(distanceToPolyline(r.points, 100, 90) > 50, 'far point should not be on the line');
+});
+
+// ------------------------------------------------------------------- state --
+check('add / undo / redo round-trips', () => {
+  loadDoc(newDoc('test'));
+  commit('add');
+  const a = addNode('dc', 0, 0);
+  const b = addNode('switch-l2', 200, 0);
+  addLink(a.id, b.id);
+  changed();
+  assert(state.doc.nodes.length === 2 && state.doc.links.length === 1, 'setup failed');
+  undo();
+  assert(state.doc.nodes.length === 0, `undo left ${state.doc.nodes.length} nodes`);
+  redo();
+  assert(state.doc.nodes.length === 2 && state.doc.links.length === 1, 'redo did not restore');
+});
+
+check('deleting a node takes its links with it', () => {
+  loadDoc(newDoc('test'));
+  const a = addNode('dc', 0, 0);
+  const b = addNode('switch-l2', 200, 0);
+  addLink(a.id, b.id);
+  removeIds([a.id]);
+  assert(state.doc.links.length === 0, `${state.doc.links.length} orphaned links remain`);
+});
+
+check('loading a doc drops links with missing endpoints', () => {
+  loadDoc({ nodes: [{ id: 'n1', type: 'dc', x: 0, y: 0, label: 'A' }],
+            links: [{ id: 'l1', from: 'n1', to: 'ghost' }], zones: [], notes: [] });
+  assert(state.doc.links.length === 0, 'dangling link survived the load');
+});
+
+check('parallel links get fanned apart', () => {
+  loadDoc(newDoc('test'));
+  const a = addNode('switch-core', 0, 0);
+  const b = addNode('switch-core', 300, 0);
+  const l1 = addLink(a.id, b.id);
+  const l2 = addLink(a.id, b.id);
+  assert(l1.offset !== l2.offset, 'two links between the same pair would overlap exactly');
+});
+
+// ----------------------------------------------------------------- samples --
+for (const sample of SAMPLES) {
+  check(`sample "${sample.id}" is internally consistent`, () => {
+    const doc = makeSample(sample.id);
+    const ids = new Set(doc.nodes.map((n) => n.id));
+    for (const l of doc.links) {
+      assert(ids.has(l.from) && ids.has(l.to), `link ${l.id} points at a missing node`);
+      assert(LINK_KINDS[l.kind], `link ${l.id} has unknown kind "${l.kind}"`);
+    }
+    for (const n of doc.nodes) {
+      assert(DEVICES[n.type], `node ${n.id} has unknown type "${n.type}"`);
+      for (const s of n.services) assert(SERVICES[s], `node ${n.label} has unknown service "${s}"`);
+    }
+    return `${doc.nodes.length} nodes, ${doc.links.length} links, ${doc.zones.length} zones`;
+  });
+}
+
+check('samples do not overlap their own nodes', () => {
+  const complaints = [];
+  for (const sample of SAMPLES) {
+    const doc = makeSample(sample.id);
+    const boxes = doc.nodes.map((n) => ({ n, b: layoutNode(n, SERVICES).box }));
+    for (let i = 0; i < boxes.length; i += 1) {
+      for (let j = i + 1; j < boxes.length; j += 1) {
+        const a = boxes[i].b;
+        const c = boxes[j].b;
+        if (a.x < c.x + c.w && a.x + a.w > c.x && a.y < c.y + c.h && a.y + a.h > c.y) {
+          complaints.push(`${sample.id}: ${boxes[i].n.label} ↔ ${boxes[j].n.label}`);
+        }
+      }
+    }
+  }
+  assert(!complaints.length, complaints.join('; '));
+});
+
+check('sample cables do not run through unrelated devices', () => {
+  const complaints = [];
+  for (const sample of SAMPLES) {
+    const doc = makeSample(sample.id);
+    const byId = new Map(doc.nodes.map((n) => [n.id, n]));
+    for (const l of doc.links) {
+      const route = routeLink(byId.get(l.from), byId.get(l.to), { offset: l.offset || 0 });
+      for (const n of doc.nodes) {
+        if (n.id === l.from || n.id === l.to) continue;
+        if (distanceToPolyline(route.points, n.x, n.y) < HALF) {
+          complaints.push(`${sample.id}: ${byId.get(l.from).label}→${byId.get(l.to).label} crosses ${n.label}`);
+        }
+      }
+    }
+  }
+  assert(!complaints.length, complaints.join('; '));
+});
+
+// ------------------------------------------------------------------ export --
+check('export produces parseable standalone SVG', () => {
+  loadDoc(makeSample('two-sites'));
+  render();
+  const svgText = buildSvg();
+  const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+  const err = doc.querySelector('parsererror');
+  assert(!err, err?.textContent?.slice(0, 200));
+  assert(doc.documentElement.getAttribute('viewBox'), 'no viewBox');
+  assert(!/sel-ring|class="handle"|marquee/.test(svgText), 'editor chrome leaked into the export');
+  assert(svgText.includes('<style>'), 'export carries no styling');
+  return `${(svgText.length / 1024).toFixed(1)} KB`;
+});
+
+check('export bounds cover every node', () => {
+  loadDoc(makeSample('campus'));
+  render();
+  const b = contentBounds(0);
+  for (const n of state.doc.nodes) {
+    const box = layoutNode(n, SERVICES).box;
+    assert(box.x >= b.x - 1 && box.x + box.w <= b.x + b.w + 1
+      && box.y >= b.y - 1 && box.y + box.h <= b.y + b.h + 1, `${n.label} falls outside the export`);
+  }
+  return `${Math.round(b.w)}×${Math.round(b.h)}`;
+});
+
+check('fit works once the canvas has a size', () => {
+  loadDoc(makeSample('dmz'));
+  assert(fitToContent() === true, 'fit reported no viewport');
+  assert(state.view.k > 0.1 && state.view.k <= 2, `implausible zoom ${state.view.k}`);
+  return `zoom ${Math.round(state.view.k * 100)}%`;
+});
+
+check('step reveal metadata is present in the dmz sample', () => {
+  loadDoc(makeSample('dmz'));
+  assert(maxStep() >= 2, `expected staged reveal, got max step ${maxStep()}`);
+  return `${maxStep()} steps`;
+});
+
+check('rendering every device type does not throw', () => {
+  loadDoc(newDoc('all devices'));
+  Object.keys(DEVICES).forEach((type, i) => {
+    addNode(type, (i % 12) * 160, Math.floor(i / 12) * 200, {
+      services: Object.keys(SERVICES).slice(0, 4),
+    });
+  });
+  render();
+  const painted = canvas.querySelectorAll('#layer-nodes > g').length;
+  assert(painted === Object.keys(DEVICES).length, `painted ${painted} of ${Object.keys(DEVICES).length}`);
+  return `${painted} device types painted`;
+});
+
+// ----------------------------------------------------------------- report ---
+const failed = results.filter((r) => !r.pass);
+document.querySelector('#results').innerHTML = results.map((r) =>
+  `<li class="${r.pass ? 'pass' : 'fail'}">${r.name}${r.detail ? ` — <code>${r.detail}</code>` : ''}</li>`).join('');
+const summary = document.querySelector('#summary');
+summary.className = failed.length ? 'bad' : 'ok';
+summary.textContent = failed.length
+  ? `${failed.length} of ${results.length} checks FAILED`
+  : `all ${results.length} checks passed`;
+document.title = failed.length ? `FAIL (${failed.length})` : 'PASS';
+</script>
+</body>
+</html>
