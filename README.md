@@ -8,6 +8,9 @@ call it `DC01`, tick the roles it runs, and the diagram says *this is the domain
 this one is read-only, that Linux box is the file server, these two sites talk over IPsec*.
 Then you export a PNG into your slides.
 
+**Use it online at <https://topodraw.online/>** — nothing to install, and nothing you draw
+leaves your browser. To run your own copy:
+
 ```bash
 ./serve.sh            # http://localhost:8770 — opens your browser
 ./serve.sh 9000       # different port
