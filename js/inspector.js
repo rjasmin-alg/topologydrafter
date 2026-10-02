@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Jasmin Redžepagić
+
 // Right rail: properties for whatever is selected.
 //
 // Text fields edit the model live. Each focus-to-blur session collapses into a

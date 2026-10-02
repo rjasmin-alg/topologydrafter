@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Jasmin Redžepagić
+
 // Pointer, wheel and drag-and-drop handling for the canvas.
 //
 // All pointer events are bound on the <svg> root rather than on individual

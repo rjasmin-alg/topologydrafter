@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Jasmin Redžepagić
+
 // Geometry: node boxes, link anchors and path routing.
 //
 // A node's (x, y) is the centre of its icon tile. Labels and service badges

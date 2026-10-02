@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Jasmin Redžepagić
+
 // Getting the drawing out: SVG, PNG, and JSON round-trip.
 //
 // Exports are built from a *fresh* SVG rather than the live one, so UI-only

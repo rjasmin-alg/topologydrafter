@@ -124,3 +124,13 @@ afterwards; they will tell you if a device points at an icon or service that doe
 | `js/exporters.js` | PNG, SVG, JSON |
 | `js/samples.js` | the ready-made diagrams |
 | `js/main.js` | toolbar, keyboard, presentation mode |
+
+## Licence
+
+Copyright (C) 2026 Jasmin Redžepagić.
+
+TopologyDrafter is free software: you can redistribute it and/or modify it under the terms
+of the [GNU Affero General Public License](LICENSE), version 3 or (at your option) any later
+version. It comes with no warranty. If you run a modified copy as a public service, the AGPL
+requires you to offer its users the source. The *source* link in the status bar does that
+for this copy.

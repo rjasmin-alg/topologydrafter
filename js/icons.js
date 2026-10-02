@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Jasmin Redžepagić
+
 // Inline SVG device glyphs, all drawn in a 0 0 24 24 box.
 //
 // The renderer wraps these in a <g class="ico"> that sets

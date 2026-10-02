@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Jasmin Redžepagić
 # Serve TopologyDrafter locally. ES modules need http://, not file://.
 set -euo pipefail
 

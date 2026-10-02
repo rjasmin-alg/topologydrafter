@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Jasmin Redžepagić
+
 // Ready-made topologies. These double as the fastest way to start a lecture:
 // load one, rename the boxes, delete what you don't need.
 

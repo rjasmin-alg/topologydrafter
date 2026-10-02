@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Jasmin Redžepagić
+
 // Domain catalog: the services you can pin on a node, and the device types
 // you can drop on the canvas. This file is the one you edit when a lecture
 // needs a box or a role that isn't here yet.

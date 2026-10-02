@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later
+   Copyright (C) 2026 Jasmin Redžepagić */
+
 /* App chrome. The canvas styles itself (see js/render.js CANVAS_CSS) so that
    exported SVG carries its own look. */
 
@@ -391,6 +394,9 @@ kbd {
   color: var(--fg-dim);
   font-size: 11.5px;
 }
+#status-right { margin-left: auto; }
+.status-src { color: inherit; text-decoration: none; margin-left: 16px; }
+.status-src:hover { text-decoration: underline; }
 
 /* --------------------------------------------------------------- present -- */
 body.presenting .toolbar,

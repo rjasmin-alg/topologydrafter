@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Jasmin Redžepagić
+
 // SVG painting. One rAF-batched full redraw of each layer.
 //
 // Everything that affects how the drawing *looks* lives in CANVAS_CSS so that

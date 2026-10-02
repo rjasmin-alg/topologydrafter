@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Jasmin Redžepagić
+
 // Left rail: searchable device palette. Drag an item onto the canvas, or click
 // it to arm it and then click where you want it (fastest when placing a row of
 // identical machines — hold Shift while clicking to stay armed).

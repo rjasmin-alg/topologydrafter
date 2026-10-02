@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Jasmin Redžepagić
+
 // Document model, undo history, selection and autosave.
 //
 // The whole drawing is one plain-JSON `doc`. Undo is snapshot based: cheap and
