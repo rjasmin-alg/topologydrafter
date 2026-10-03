@@ -36,6 +36,7 @@ import { ICONS, iconFor } from '../js/icons.js';
 import { layoutNode, routeLink, distanceToPolyline, wrapText, HALF } from '../js/geom.js';
 import {
   state, newDoc, loadDoc, addNode, addLink, commit, undo, redo, removeIds, changed, maxStep,
+  STORAGE_KEYS,
 } from '../js/state.js';
 import { initRenderer, render } from '../js/render.js';
 import { initInteractions, contentBounds, fitToContent } from '../js/interact.js';
@@ -274,6 +275,15 @@ check('rendering every device type does not throw', () => {
   const painted = canvas.querySelectorAll('#layer-nodes > g').length;
   assert(painted === Object.keys(DEVICES).length, `painted ${painted} of ${Object.keys(DEVICES).length}`);
   return `${painted} device types painted`;
+});
+
+// ---------------------------------------------------------------- privacy ---
+const privacyHtml = await fetch('../privacy.html').then((r) => (r.ok ? r.text() : '')).catch(() => '');
+check('privacy note names every localStorage key the app uses', () => {
+  assert(privacyHtml, 'privacy.html did not load');
+  const missing = STORAGE_KEYS.filter((k) => !privacyHtml.includes(k));
+  assert(!missing.length, `not in privacy.html: ${missing.join(', ')}`);
+  return `${STORAGE_KEYS.length} keys listed`;
 });
 
 // ----------------------------------------------------------------- report ---

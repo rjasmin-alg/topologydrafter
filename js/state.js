@@ -11,6 +11,9 @@ import { deviceOrDefault } from './catalog.js';
 export const DOC_VERSION = 2;
 const AUTOSAVE_KEY = 'topologydrafter.autosave.v2';
 const PREFS_KEY = 'topologydrafter.prefs.v2';
+// Everything the app keeps in localStorage. privacy.html lists these by name,
+// and a smoke check fails if the two drift apart.
+export const STORAGE_KEYS = [AUTOSAVE_KEY, PREFS_KEY];
 const MAX_HISTORY = 120;
 
 let idSeq = 0;

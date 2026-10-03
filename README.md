@@ -128,6 +128,13 @@ afterwards; they will tell you if a device points at an icon or service that doe
 | `js/samples.js` | the ready-made diagrams |
 | `js/main.js` | toolbar, keyboard, presentation mode |
 
+## Privacy
+
+No cookies, no analytics, no third-party requests. The only things stored are your current
+diagram and your editor settings, in your browser's `localStorage`; see
+[`privacy.html`](privacy.html). If you add anything that stores or sends data, update that
+page too. `tests/smoke.html` checks that it names every storage key the app uses.
+
 ## Licence
 
 Copyright (C) 2026 Jasmin Redžepagić.

@@ -1,0 +1,91 @@
+<!doctype html>
+<!-- TopologyDrafter — Copyright (C) 2026 Jasmin Redžepagić. AGPL-3.0-or-later; source: https://github.com/rjasmin-alg/topologydrafter -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy — TopologyDrafter</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect x='2' y='8' width='20' height='11' rx='3' fill='none' stroke='%230ea5e9' stroke-width='2'/></svg>">
+<style>
+  :root {
+    --bg: #10151f;
+    --fg: #e6edf7;
+    --fg-dim: #93a3ba;
+    --line: #2b3a52;
+    --accent: #38bdf8;
+    --code: #182131;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #ffffff;
+      --fg: #172033;
+      --fg-dim: #56657d;
+      --line: #d7dee9;
+      --accent: #0369a1;
+      --code: #f1f5f9;
+      color-scheme: light;
+    }
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 15px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 680px; margin: 0 auto; padding: 40px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; }
+  p, li { margin: 0 0 10px; }
+  ul { padding-left: 20px; }
+  a { color: var(--accent); }
+  code { background: var(--code); padding: 1px 5px; border-radius: 4px; font-size: 13.5px; }
+  .dim { color: var(--fg-dim); }
+  .back { display: inline-block; margin-bottom: 24px; }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="./">← Back to TopologyDrafter</a>
+
+<h1>Privacy</h1>
+<p class="dim">Last updated 3 October 2026</p>
+
+<p><strong>Short version: what you draw stays in your browser.</strong> TopologyDrafter has
+no accounts, no cookies, no analytics, no advertising and no third-party scripts or fonts.
+Apart from loading the app itself, it makes no requests to this server or anyone else.</p>
+
+<h2>What is stored, and where</h2>
+<p>The app keeps two entries in your browser's <em>local storage</em>, on your own device.
+Neither is ever sent to the server:</p>
+<ul>
+  <li><code>topologydrafter.autosave.v2</code> — the diagram you are working on, so it is
+    still there if you close the tab or reload.</li>
+  <li><code>topologydrafter.prefs.v2</code> — your editor settings: light or dark theme, grid,
+    snapping, cable routing and the default link type.</li>
+</ul>
+<p>Both exist only to provide the editor you are using, so they need no consent. To remove
+them, clear this site's data in your browser settings. Private or incognito windows discard
+them when you close the window.</p>
+
+<h2>Files, export and the clipboard</h2>
+<p>Opening and saving <code>.json</code> files, exporting PNG or SVG, and copying to the
+clipboard all happen locally in your browser. Files go only where you put them.</p>
+
+<h2>Links to other sites</h2>
+<p>The <em>source</em> link opens the project's page on GitHub, which has its own privacy
+policy. Nothing is loaded from GitHub unless you click it.</p>
+
+<h2>Who runs this</h2>
+<p>TopologyDrafter is written and operated by Jasmin Redžepagić. It is free software under
+the <a href="https://github.com/rjasmin-alg/topologydrafter/blob/main/LICENSE">GNU AGPL v3</a>,
+and you can <a href="https://github.com/rjasmin-alg/topologydrafter">read the source</a>
+to check everything on this page.</p>
+<p>For questions about this notice or your data, please
+<a href="https://github.com/rjasmin-alg/topologydrafter/issues">open an issue on GitHub</a>.</p>
+
+<footer class="dim">If this notice changes, the date at the top changes with it.</footer>
+</main>
+</body>
+</html>
